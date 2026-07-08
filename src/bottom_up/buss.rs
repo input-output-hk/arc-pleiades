@@ -193,12 +193,7 @@ impl<F: PrimeField + FromUniformBytes<64>> BottumUpSS<F> for BottomUpSSS {
         }
 
         // Assert there is no point at 0
-        let mut evals: Vec<(F, F)> = shares
-            .iter()
-            .map(|s| {
-                (s.x, s.y)
-            })
-            .collect();
+        let mut evals: Vec<(F, F)> = shares.iter().map(|s| (s.x, s.y)).collect();
         if evals.iter().any(|s| s.0.is_zero_vartime()) {
             return Err(Error::InvalidShares);
         }

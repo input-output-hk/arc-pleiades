@@ -14,7 +14,10 @@ const SIZES: [usize; 3] = [10, 50, 100];
 
 fn guardian_shares(n: usize, rng: &mut StdRng) -> Vec<Share<Fq>> {
     (1..n)
-        .map(|j| Share { x: Fq::from(j as u64), y: Fq::random(&mut *rng) })
+        .map(|j| Share {
+            x: Fq::from(j as u64),
+            y: Fq::random(&mut *rng),
+        })
         .collect()
 }
 
@@ -47,9 +50,13 @@ fn bench_reconstruct(c: &mut Criterion) {
         let shares = guardian_shares(n, &mut rng);
         let phi = buss.split(secret, &shares).unwrap();
 
-        group.bench_with_input(BenchmarkId::new("reconstruct", n), &(phi, shares), |b, (phi, shares)| {
-            b.iter(|| buss.reconstruct(phi, &shares[..buss.threshold()]).unwrap())
-        });
+        group.bench_with_input(
+            BenchmarkId::new("reconstruct", n),
+            &(phi, shares),
+            |b, (phi, shares)| {
+                b.iter(|| buss.reconstruct(phi, &shares[..buss.threshold()]).unwrap())
+            },
+        );
     }
 
     group.finish();
@@ -69,17 +76,29 @@ fn bench_update_public_shares(c: &mut Criterion) {
         let guardian_index = all_indices[0];
         let delta = Fq::random(&mut rng);
 
-        group.bench_with_input(BenchmarkId::new("update_public_shares", n), &phi, |b, phi| {
-            b.iter_batched(
-                || phi.clone(),
-                |mut phi| buss.update_public_shares(guardian_index, &all_indices, delta, &mut phi).unwrap(),
-                BatchSize::SmallInput,
-            )
-        });
+        group.bench_with_input(
+            BenchmarkId::new("update_public_shares", n),
+            &phi,
+            |b, phi| {
+                b.iter_batched(
+                    || phi.clone(),
+                    |mut phi| {
+                        buss.update_public_shares(guardian_index, &all_indices, delta, &mut phi)
+                            .unwrap()
+                    },
+                    BatchSize::SmallInput,
+                )
+            },
+        );
     }
 
     group.finish();
 }
 
-criterion_group!(benches, bench_split, bench_reconstruct, bench_update_public_shares);
+criterion_group!(
+    benches,
+    bench_split,
+    bench_reconstruct,
+    bench_update_public_shares
+);
 criterion_main!(benches);

@@ -1,10 +1,12 @@
 use arc_pleiades::bottom_up::buss::{guardian_share, key_update_delta, Share as BussShare};
+use arc_pleiades::bottom_up::traceable_buss::TracingKey as TBussTracingKey;
 use arc_pleiades::bottom_up::{BottumUpSS, TraceableBSS};
 use arc_pleiades::secret_sharing::feldman::Share as FeldmanShare;
 use arc_pleiades::secret_sharing::shamir::Share as ShamirShare;
-use arc_pleiades::secret_sharing::traceable_shamir::{Share as TsShare, TracingKey as TsTracingKey};
+use arc_pleiades::secret_sharing::traceable_shamir::{
+    Share as TsShare, TracingKey as TsTracingKey,
+};
 use arc_pleiades::secret_sharing::{SecretSharing, TraceableSS, VerifiableSS};
-use arc_pleiades::bottom_up::traceable_buss::TracingKey as TBussTracingKey;
 use arc_pleiades::{BottomUpSSS, FeldmanVSS, ShamirSecretSharing, TraceableBuss, TraceableShamir};
 use ff::{Field, PrimeField};
 use group::GroupEncoding;
@@ -108,8 +110,14 @@ pub fn shamir_split(secret: u64, t: usize, n: usize, seed: &[u8]) -> Result<JsVa
     let shares: Vec<WasmShare> = (1..n)
         .map(|i| {
             let x = Fq::from(i as u64);
-            let y = coeffs.iter().rev().fold(Fq::from(0u64), |acc, &c| acc * x + c);
-            WasmShare { x: to_hex(x), y: to_hex(y) }
+            let y = coeffs
+                .iter()
+                .rev()
+                .fold(Fq::from(0u64), |acc, &c| acc * x + c);
+            WasmShare {
+                x: to_hex(x),
+                y: to_hex(y),
+            }
         })
         .collect();
 
@@ -136,7 +144,9 @@ pub fn shamir_reconstruct(shares_json: &str, t: usize, n: usize) -> Result<u64, 
         })
         .collect::<Result<_, _>>()?;
     let sss = ShamirSecretSharing::new(t, n).map_err(|e| JsError::new(&e.to_string()))?;
-    let secret = sss.reconstruct(&shares).map_err(|e| JsError::new(&e.to_string()))?;
+    let secret = sss
+        .reconstruct(&shares)
+        .map_err(|e| JsError::new(&e.to_string()))?;
     Ok(to_u64(secret))
 }
 
@@ -166,7 +176,13 @@ pub fn feldman_split(secret: u64, t: usize, n: usize, seed: &[u8]) -> Result<JsV
         .map_err(|e| JsError::new(&e.to_string()))?;
 
     let result = FeldmanSplitResult {
-        shares: shares.iter().map(|s| WasmShare { x: to_hex(s.x), y: to_hex(s.y) }).collect(),
+        shares: shares
+            .iter()
+            .map(|s| WasmShare {
+                x: to_hex(s.x),
+                y: to_hex(s.y),
+            })
+            .collect(),
         vk: vk.into_iter().map(to_hex_point).collect(),
     };
     serde_wasm_bindgen::to_value(&result).map_err(|e| JsError::new(&e.to_string()))
@@ -176,9 +192,18 @@ pub fn feldman_split(secret: u64, t: usize, n: usize, seed: &[u8]) -> Result<JsV
 /// Returns `true`/`false` rather than throwing — a failed check is an
 /// expected outcome, not an error.
 #[wasm_bindgen]
-pub fn feldman_verify_share(share_json: &str, vk_json: &str, t: usize, n: usize) -> Result<bool, JsError> {
-    let s: WasmShare = serde_json::from_str(share_json).map_err(|e| JsError::new(&e.to_string()))?;
-    let share = FeldmanShare { x: parse_hex(&s.x, "share x")?, y: parse_hex(&s.y, "share y")? };
+pub fn feldman_verify_share(
+    share_json: &str,
+    vk_json: &str,
+    t: usize,
+    n: usize,
+) -> Result<bool, JsError> {
+    let s: WasmShare =
+        serde_json::from_str(share_json).map_err(|e| JsError::new(&e.to_string()))?;
+    let share = FeldmanShare {
+        x: parse_hex(&s.x, "share x")?,
+        y: parse_hex(&s.y, "share y")?,
+    };
 
     let vk_raw: Vec<String> =
         serde_json::from_str(vk_json).map_err(|e| JsError::new(&e.to_string()))?;
@@ -199,11 +224,16 @@ pub fn feldman_reconstruct(shares_json: &str, t: usize, n: usize) -> Result<u64,
     let shares: Vec<FeldmanShare<Fq>> = raw
         .iter()
         .map(|s| -> Result<FeldmanShare<Fq>, JsError> {
-            Ok(FeldmanShare { x: parse_hex(&s.x, "share x")?, y: parse_hex(&s.y, "share y")? })
+            Ok(FeldmanShare {
+                x: parse_hex(&s.x, "share x")?,
+                y: parse_hex(&s.y, "share y")?,
+            })
         })
         .collect::<Result<_, _>>()?;
     let vss = FeldmanVSS::<G1Projective>::new(t, n).map_err(|e| JsError::new(&e.to_string()))?;
-    let secret = vss.reconstruct(&shares).map_err(|e| JsError::new(&e.to_string()))?;
+    let secret = vss
+        .reconstruct(&shares)
+        .map_err(|e| JsError::new(&e.to_string()))?;
     Ok(to_u64(secret))
 }
 
@@ -242,7 +272,13 @@ pub fn ts_split(secret: u64, t: usize, n: usize, seed: &[u8]) -> Result<JsValue,
         .compute_tracing_keys(&poly)
         .map_err(|e| JsError::new(&e.to_string()))?;
     let result = TsSplitResult {
-        shares: shares.iter().map(|s| WasmShare { x: to_hex(s.x), y: to_hex(s.y) }).collect(),
+        shares: shares
+            .iter()
+            .map(|s| WasmShare {
+                x: to_hex(s.x),
+                y: to_hex(s.y),
+            })
+            .collect(),
         tk: tk_public.0.iter().map(|&x| to_hex(x)).collect(),
     };
     serde_wasm_bindgen::to_value(&result).map_err(|e| JsError::new(&e.to_string()))
@@ -256,12 +292,17 @@ pub fn ts_reconstruct(shares_json: &str, t: usize, n: usize) -> Result<u64, JsEr
     let shares: Vec<TsShare<Fq>> = raw
         .iter()
         .map(|s| -> Result<TsShare<Fq>, JsError> {
-            Ok(TsShare { x: parse_hex(&s.x, "share x")?, y: parse_hex(&s.y, "share y")? })
+            Ok(TsShare {
+                x: parse_hex(&s.x, "share x")?,
+                y: parse_hex(&s.y, "share y")?,
+            })
         })
         .collect::<Result<_, _>>()?;
     let ts = TraceableShamir::<Sha512>::new(t + 1, n - 1, DEMO_PLACEHOLDER_F, DEMO_SEC_PARAM)
         .map_err(|e| JsError::new(&e.to_string()))?;
-    let secret = ts.reconstruct(&shares).map_err(|e| JsError::new(&e.to_string()))?;
+    let secret = ts
+        .reconstruct(&shares)
+        .map_err(|e| JsError::new(&e.to_string()))?;
     Ok(to_u64(secret))
 }
 
@@ -292,7 +333,10 @@ pub fn ts_trace(
     let all_shares: Vec<TsShare<Fq>> = raw
         .iter()
         .map(|s| -> Result<TsShare<Fq>, JsError> {
-            Ok(TsShare { x: parse_hex(&s.x, "share x")?, y: parse_hex(&s.y, "share y")? })
+            Ok(TsShare {
+                x: parse_hex(&s.x, "share x")?,
+                y: parse_hex(&s.y, "share y")?,
+            })
         })
         .collect::<Result<_, _>>()?;
 
@@ -308,7 +352,10 @@ pub fn ts_trace(
         serde_json::from_str(corrupt_json).map_err(|e| JsError::new(&e.to_string()))?;
     let corrupted: Vec<TsShare<Fq>> = corrupt_idx
         .iter()
-        .map(|&i| TsShare { x: all_shares[i].x, y: all_shares[i].y })
+        .map(|&i| TsShare {
+            x: all_shares[i].x,
+            y: all_shares[i].y,
+        })
         .collect();
 
     let f = corrupted.len();
@@ -318,7 +365,9 @@ pub fn ts_trace(
     let (accused, witness) = ts
         .trace(&tk_public, &corrupted, &mut rng)
         .map_err(|e| JsError::new(&e.to_string()))?
-        .ok_or_else(|| JsError::new("tracing failed: no candidate polynomial matched the trace key"))?;
+        .ok_or_else(|| {
+            JsError::new("tracing failed: no candidate polynomial matched the trace key")
+        })?;
     ts.verify_trace(&accused, &witness, &tk_public)
         .map_err(|e| JsError::new(&e.to_string()))?;
 
@@ -348,7 +397,9 @@ pub fn buss_setup(secret: u64, t: usize, n: usize, seed: &[u8]) -> Result<JsValu
     let s = Fq::from(secret);
     let buss = BottomUpSSS::new(t, n).map_err(|e| JsError::new(&e.to_string()))?;
 
-    let guardian_sks: Vec<Fq> = (0..buss.num_shares()).map(|_| Fq::random(&mut rng)).collect();
+    let guardian_sks: Vec<Fq> = (0..buss.num_shares())
+        .map(|_| Fq::random(&mut rng))
+        .collect();
     let sigma_b: Vec<BussShare<Fq>> = guardian_sks
         .iter()
         .enumerate()
@@ -358,7 +409,9 @@ pub fn buss_setup(secret: u64, t: usize, n: usize, seed: &[u8]) -> Result<JsValu
         })
         .collect();
 
-    let phi = buss.split(s, &sigma_b).map_err(|e| JsError::new(&e.to_string()))?;
+    let phi = buss
+        .split(s, &sigma_b)
+        .map_err(|e| JsError::new(&e.to_string()))?;
 
     let result = BussSetupResult {
         phi: phi.iter().map(|s| to_hex(s.y)).collect(),
@@ -389,7 +442,10 @@ pub fn buss_reconstruct(
         .iter()
         .enumerate()
         .map(|(i, h)| -> Result<BussShare<Fq>, JsError> {
-            Ok(BussShare { x: -Fq::from((i + 1) as u64), y: parse_hex(h, "phi entry")? })
+            Ok(BussShare {
+                x: -Fq::from((i + 1) as u64),
+                y: parse_hex(h, "phi entry")?,
+            })
         })
         .collect::<Result<_, _>>()?;
 
@@ -407,7 +463,9 @@ pub fn buss_reconstruct(
         .collect::<Result<_, _>>()?;
 
     let buss = BottomUpSSS::new(t, n).map_err(|e| JsError::new(&e.to_string()))?;
-    let secret = buss.reconstruct(&phi, &sigma_r).map_err(|e| JsError::new(&e.to_string()))?;
+    let secret = buss
+        .reconstruct(&phi, &sigma_r)
+        .map_err(|e| JsError::new(&e.to_string()))?;
     Ok(to_u64(secret))
 }
 
@@ -434,7 +492,10 @@ pub fn buss_rotate(
         .iter()
         .enumerate()
         .map(|(i, h)| -> Result<BussShare<Fq>, JsError> {
-            Ok(BussShare { x: -Fq::from((i + 1) as u64), y: parse_hex(h, "phi entry")? })
+            Ok(BussShare {
+                x: -Fq::from((i + 1) as u64),
+                y: parse_hex(h, "phi entry")?,
+            })
         })
         .collect::<Result<_, _>>()?;
 
@@ -448,11 +509,18 @@ pub fn buss_rotate(
     let t = n - phi_len - 1;
 
     let buss = BottomUpSSS::new(t, n).map_err(|e| JsError::new(&e.to_string()))?;
-    let all_indices: Vec<Fq> = (1..=buss.num_shares()).map(|j| Fq::from(j as u64)).collect();
+    let all_indices: Vec<Fq> = (1..=buss.num_shares())
+        .map(|j| Fq::from(j as u64))
+        .collect();
 
     let delta = key_update_delta::<Fq, Sha512>(DEMO_OWNER_ID, old_sk, new_sk);
-    buss.update_public_shares(Fq::from(guardian_index as u64), &all_indices, delta, &mut phi)
-        .map_err(|e| JsError::new(&e.to_string()))?;
+    buss.update_public_shares(
+        Fq::from(guardian_index as u64),
+        &all_indices,
+        delta,
+        &mut phi,
+    )
+    .map_err(|e| JsError::new(&e.to_string()))?;
 
     let new_sigma = guardian_share::<Fq, Sha512>(DEMO_OWNER_ID, new_sk);
 
@@ -504,17 +572,34 @@ pub fn tbuss_split(secret: u64, t: usize, n: usize, seed: &[u8]) -> Result<JsVal
     let shares: Vec<BussShare<Fq>> = xs
         .iter()
         .zip(&guardian_sks)
-        .map(|(&x, &sk)| BussShare { x, y: guardian_share::<Fq, Sha512>(DEMO_OWNER_ID, sk) })
+        .map(|(&x, &sk)| BussShare {
+            x,
+            y: guardian_share::<Fq, Sha512>(DEMO_OWNER_ID, sk),
+        })
         .collect();
 
-    let phi = tbuss.split(s, &shares).map_err(|e| JsError::new(&e.to_string()))?;
+    let phi = tbuss
+        .split(s, &shares)
+        .map_err(|e| JsError::new(&e.to_string()))?;
     let (_sk_key, vk) = tbuss
         .compute_tracing_keys(&shares)
         .map_err(|e| JsError::new(&e.to_string()))?;
 
     let result = TBussSetupResult {
-        shares: shares.iter().map(|s| WasmShare { x: to_hex(s.x), y: to_hex(s.y) }).collect(),
-        phi: phi.iter().map(|s| WasmShare { x: to_hex(s.x), y: to_hex(s.y) }).collect(),
+        shares: shares
+            .iter()
+            .map(|s| WasmShare {
+                x: to_hex(s.x),
+                y: to_hex(s.y),
+            })
+            .collect(),
+        phi: phi
+            .iter()
+            .map(|s| WasmShare {
+                x: to_hex(s.x),
+                y: to_hex(s.y),
+            })
+            .collect(),
         guardian_sks: guardian_sks.iter().map(|&sk| to_hex(sk)).collect(),
         vk: vk.0.iter().map(|&v| to_hex(v)).collect(),
     };
@@ -523,13 +608,21 @@ pub fn tbuss_split(secret: u64, t: usize, n: usize, seed: &[u8]) -> Result<JsVal
 
 /// Reconstruct the secret from φ and t+1 guardian shares (JSON arrays of `{x,y}`).
 #[wasm_bindgen]
-pub fn tbuss_reconstruct(phi_json: &str, selected_json: &str, t: usize, n: usize) -> Result<u64, JsError> {
+pub fn tbuss_reconstruct(
+    phi_json: &str,
+    selected_json: &str,
+    t: usize,
+    n: usize,
+) -> Result<u64, JsError> {
     let phi_raw: Vec<WasmShare> =
         serde_json::from_str(phi_json).map_err(|e| JsError::new(&e.to_string()))?;
     let phi: Vec<BussShare<Fq>> = phi_raw
         .iter()
         .map(|s| -> Result<BussShare<Fq>, JsError> {
-            Ok(BussShare { x: parse_hex(&s.x, "phi x")?, y: parse_hex(&s.y, "phi y")? })
+            Ok(BussShare {
+                x: parse_hex(&s.x, "phi x")?,
+                y: parse_hex(&s.y, "phi y")?,
+            })
         })
         .collect::<Result<_, _>>()?;
 
@@ -538,7 +631,10 @@ pub fn tbuss_reconstruct(phi_json: &str, selected_json: &str, t: usize, n: usize
     let selected: Vec<BussShare<Fq>> = selected_raw
         .iter()
         .map(|s| -> Result<BussShare<Fq>, JsError> {
-            Ok(BussShare { x: parse_hex(&s.x, "share x")?, y: parse_hex(&s.y, "share y")? })
+            Ok(BussShare {
+                x: parse_hex(&s.x, "share x")?,
+                y: parse_hex(&s.y, "share y")?,
+            })
         })
         .collect::<Result<_, _>>()?;
 
@@ -570,7 +666,10 @@ pub fn tbuss_trace(
     let all_shares: Vec<BussShare<Fq>> = shares_raw
         .iter()
         .map(|s| -> Result<BussShare<Fq>, JsError> {
-            Ok(BussShare { x: parse_hex(&s.x, "share x")?, y: parse_hex(&s.y, "share y")? })
+            Ok(BussShare {
+                x: parse_hex(&s.x, "share x")?,
+                y: parse_hex(&s.y, "share y")?,
+            })
         })
         .collect::<Result<_, _>>()?;
 
@@ -579,7 +678,10 @@ pub fn tbuss_trace(
     let phi: Vec<BussShare<Fq>> = phi_raw
         .iter()
         .map(|s| -> Result<BussShare<Fq>, JsError> {
-            Ok(BussShare { x: parse_hex(&s.x, "phi x")?, y: parse_hex(&s.y, "phi y")? })
+            Ok(BussShare {
+                x: parse_hex(&s.x, "phi x")?,
+                y: parse_hex(&s.y, "phi y")?,
+            })
         })
         .collect::<Result<_, _>>()?;
 
@@ -596,7 +698,10 @@ pub fn tbuss_trace(
         serde_json::from_str(corrupt_json).map_err(|e| JsError::new(&e.to_string()))?;
     let corrupted: Vec<BussShare<Fq>> = corrupt_idx
         .iter()
-        .map(|&i| BussShare { x: all_shares[i].x, y: all_shares[i].y })
+        .map(|&i| BussShare {
+            x: all_shares[i].x,
+            y: all_shares[i].y,
+        })
         .collect();
 
     let f = corrupted.len();
@@ -606,7 +711,9 @@ pub fn tbuss_trace(
     let (accused, witness) = tbuss
         .trace(&vk, &phi, &corrupted, &mut rng)
         .map_err(|e| JsError::new(&e.to_string()))?
-        .ok_or_else(|| JsError::new("tracing failed: no candidate polynomial matched the trace key"))?;
+        .ok_or_else(|| {
+            JsError::new("tracing failed: no candidate polynomial matched the trace key")
+        })?;
     tbuss
         .verify_trace(&accused, &witness, &vk)
         .map_err(|e| JsError::new(&e.to_string()))?;

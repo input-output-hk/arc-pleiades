@@ -25,7 +25,12 @@ fn guardian_shares(n: usize, rng: &mut StdRng) -> Vec<Share<Fq>> {
             xs.push(x);
         }
     }
-    xs.into_iter().map(|x| Share { x, y: Fq::random(&mut *rng) }).collect()
+    xs.into_iter()
+        .map(|x| Share {
+            x,
+            y: Fq::random(&mut *rng),
+        })
+        .collect()
 }
 
 fn bench_split(c: &mut Criterion) {
@@ -55,9 +60,11 @@ fn bench_compute_tracing_keys(c: &mut Criterion) {
         let tbuss = TraceableBuss::<Sha512>::new(t, n, F, SEC_PARAM).unwrap();
         let shares = guardian_shares(n, &mut rng);
 
-        group.bench_with_input(BenchmarkId::new("compute_tracing_keys", n), &shares, |b, shares| {
-            b.iter(|| tbuss.compute_tracing_keys(shares).unwrap())
-        });
+        group.bench_with_input(
+            BenchmarkId::new("compute_tracing_keys", n),
+            &shares,
+            |b, shares| b.iter(|| tbuss.compute_tracing_keys(shares).unwrap()),
+        );
     }
 
     group.finish();
@@ -74,9 +81,17 @@ fn bench_reconstruct(c: &mut Criterion) {
         let shares = guardian_shares(n, &mut rng);
         let phi = tbuss.split(secret, &shares).unwrap();
 
-        group.bench_with_input(BenchmarkId::new("reconstruct", n), &(phi, shares), |b, (phi, shares)| {
-            b.iter(|| tbuss.reconstruct(phi, &shares[..tbuss.threshold()]).unwrap())
-        });
+        group.bench_with_input(
+            BenchmarkId::new("reconstruct", n),
+            &(phi, shares),
+            |b, (phi, shares)| {
+                b.iter(|| {
+                    tbuss
+                        .reconstruct(phi, &shares[..tbuss.threshold()])
+                        .unwrap()
+                })
+            },
+        );
     }
 
     group.finish();
@@ -96,13 +111,21 @@ fn bench_update_public_shares(c: &mut Criterion) {
         let guardian_index = all_indices[0];
         let delta = Fq::random(&mut rng);
 
-        group.bench_with_input(BenchmarkId::new("update_public_shares", n), &phi, |b, phi| {
-            b.iter_batched(
-                || phi.clone(),
-                |mut phi| tbuss.update_public_shares(guardian_index, &all_indices, delta, &mut phi).unwrap(),
-                BatchSize::SmallInput,
-            )
-        });
+        group.bench_with_input(
+            BenchmarkId::new("update_public_shares", n),
+            &phi,
+            |b, phi| {
+                b.iter_batched(
+                    || phi.clone(),
+                    |mut phi| {
+                        tbuss
+                            .update_public_shares(guardian_index, &all_indices, delta, &mut phi)
+                            .unwrap()
+                    },
+                    BatchSize::SmallInput,
+                )
+            },
+        );
     }
 
     group.finish();
@@ -123,14 +146,21 @@ fn bench_trace(c: &mut Criterion) {
         let shares = guardian_shares(n, &mut rng);
         let phi = tbuss.split(secret, &shares).unwrap();
         let (tk, _vk) = tbuss.compute_tracing_keys(&shares).unwrap();
-        let corrupted = [Share { x: shares[0].x, y: shares[0].y }];
+        let corrupted = [Share {
+            x: shares[0].x,
+            y: shares[0].y,
+        }];
 
-        group.bench_with_input(BenchmarkId::new("trace", n), &(phi, corrupted), |b, (phi, corrupted)| {
-            b.iter(|| {
-                let mut rng = StdRng::seed_from_u64(42);
-                tbuss.trace(&tk, phi, corrupted, &mut rng).unwrap()
-            })
-        });
+        group.bench_with_input(
+            BenchmarkId::new("trace", n),
+            &(phi, corrupted),
+            |b, (phi, corrupted)| {
+                b.iter(|| {
+                    let mut rng = StdRng::seed_from_u64(42);
+                    tbuss.trace(&tk, phi, corrupted, &mut rng).unwrap()
+                })
+            },
+        );
     }
 
     group.finish();
@@ -146,12 +176,20 @@ fn bench_verify_trace(c: &mut Criterion) {
         let shares = guardian_shares(n, &mut rng);
         let phi = tbuss.split(secret, &shares).unwrap();
         let (tk, vk) = tbuss.compute_tracing_keys(&shares).unwrap();
-        let corrupted = [Share { x: shares[0].x, y: shares[0].y }];
-        let (accused, proofs) = tbuss.trace(&tk, &phi, &corrupted, &mut rng).unwrap().unwrap();
+        let corrupted = [Share {
+            x: shares[0].x,
+            y: shares[0].y,
+        }];
+        let (accused, proofs) = tbuss
+            .trace(&tk, &phi, &corrupted, &mut rng)
+            .unwrap()
+            .unwrap();
 
-        group.bench_with_input(BenchmarkId::new("verify_trace", n), &(accused, proofs), |b, (accused, proofs)| {
-            b.iter(|| tbuss.verify_trace(accused, proofs, &vk).unwrap())
-        });
+        group.bench_with_input(
+            BenchmarkId::new("verify_trace", n),
+            &(accused, proofs),
+            |b, (accused, proofs)| b.iter(|| tbuss.verify_trace(accused, proofs, &vk).unwrap()),
+        );
     }
 
     group.finish();

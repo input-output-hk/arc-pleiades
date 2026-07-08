@@ -50,9 +50,11 @@ fn bench_compute_tracing_keys(c: &mut Criterion) {
         let secret = Fq::random(&mut rng);
         let poly = ts.polynomial(secret, &mut rng);
 
-        group.bench_with_input(BenchmarkId::new("compute_tracing_keys", n), &poly, |b, poly| {
-            b.iter(|| ts.compute_tracing_keys(poly).unwrap())
-        });
+        group.bench_with_input(
+            BenchmarkId::new("compute_tracing_keys", n),
+            &poly,
+            |b, poly| b.iter(|| ts.compute_tracing_keys(poly).unwrap()),
+        );
     }
 
     group.finish();
@@ -94,7 +96,10 @@ fn bench_trace(c: &mut Criterion) {
         let poly = ts.polynomial(secret, &mut rng);
         let shares = ts.split(&poly).unwrap();
         let (tk, _vk) = ts.compute_tracing_keys(&poly).unwrap();
-        let corrupted = [Share { x: shares[0].x, y: shares[0].y }];
+        let corrupted = [Share {
+            x: shares[0].x,
+            y: shares[0].y,
+        }];
 
         group.bench_with_input(BenchmarkId::new("trace", n), &corrupted, |b, corrupted| {
             b.iter(|| {
@@ -117,12 +122,17 @@ fn bench_verify_trace(c: &mut Criterion) {
         let poly = ts.polynomial(secret, &mut rng);
         let shares = ts.split(&poly).unwrap();
         let (tk, vk) = ts.compute_tracing_keys(&poly).unwrap();
-        let corrupted = [Share { x: shares[0].x, y: shares[0].y }];
+        let corrupted = [Share {
+            x: shares[0].x,
+            y: shares[0].y,
+        }];
         let (accused, proofs) = ts.trace(&tk, &corrupted, &mut rng).unwrap().unwrap();
 
-        group.bench_with_input(BenchmarkId::new("verify_trace", n), &(accused, proofs), |b, (accused, proofs)| {
-            b.iter(|| ts.verify_trace(accused, proofs, &vk).unwrap())
-        });
+        group.bench_with_input(
+            BenchmarkId::new("verify_trace", n),
+            &(accused, proofs),
+            |b, (accused, proofs)| b.iter(|| ts.verify_trace(accused, proofs, &vk).unwrap()),
+        );
     }
 
     group.finish();
