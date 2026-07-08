@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pleiades — Decentralised Key Recovery | Input Output Group</title>
+  <meta name="description" content="Input Output Group's Pleiades — decentralised key recovery via Shamir Secret Sharing and Bottom-Up Secret Sharing.">
+
+  <script>
+    (function(){var t=localStorage.getItem('pleiades-theme')||'dark';document.documentElement.setAttribute('data-theme',t)})();
+  </script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Barlow:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300&family=Bricolage+Grotesque:opsz,wght@12..60,300;12..60,400;12..60,500;12..60,600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/tokyo-night-dark.min.css">
+  <link rel="stylesheet" href="style.css">
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/rust.min.js"></script>
+</head>
+<body>
+
+<!-- ── NAV ── -->
+<nav>
+  <a class="nav-brand" href="index.html">
+    <img class="logo-dark"  src="assets/io-marque-white.png" alt="Input Output Group">
+    <img class="logo-light" src="assets/io-marque-black.png" alt="Input Output Group">
+    <span class="nav-sep"></span>
+    <span class="nav-product">pleiades</span>
+  </a>
+  <div class="nav-tabs">
+    <a class="tab-btn active" href="index.html">Home</a>
+    <a class="tab-btn"        href="sss.html">SSS</a>
+    <a class="tab-btn"        href="buss.html">BUSS</a>
+    <a class="tab-btn"        href="compare.html">Compare</a>
+  </div>
+  <div class="nav-right">
+    <a href="https://github.com/input-output-hk/arc-pleiades" class="nav-gh" target="_blank">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0 0 24 12c0-6.63-5.37-12-12-12z"/></svg>
+      GitHub
+    </a>
+    <button class="theme-toggle" onclick="toggleTheme()" aria-label="Toggle theme">
+      <svg class="icon-sun" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/>
+        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
+        <line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/>
+        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+      </svg>
+      <svg class="icon-moon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+      </svg>
+    </button>
+  </div>
+</nav>
+
+<!-- ── HERO: Enlightenment gradient + starfield + schematic overlay ── -->
+<section class="hero">
+  <canvas id="starfield"></canvas>
+
+  <!-- Schematic overlay — thin technical lines per §6.2 -->
+  <svg class="schematic" viewBox="0 0 1440 900" preserveAspectRatio="xMidYMid slice"
+       fill="none" style="opacity:.06;" xmlns="http://www.w3.org/2000/svg">
+    <line x1="0" y1="150" x2="1440" y2="150" stroke="white" stroke-width="0.5"/>
+    <line x1="0" y1="300" x2="1440" y2="300" stroke="white" stroke-width="0.5"/>
+    <line x1="0" y1="600" x2="1440" y2="600" stroke="white" stroke-width="0.5"/>
+    <line x1="0" y1="750" x2="1440" y2="750" stroke="white" stroke-width="0.5"/>
+    <line x1="240"  y1="0" x2="240"  y2="900" stroke="white" stroke-width="0.5"/>
+    <line x1="480"  y1="0" x2="480"  y2="900" stroke="white" stroke-width="0.5"/>
+    <line x1="960"  y1="0" x2="960"  y2="900" stroke="white" stroke-width="0.5"/>
+    <line x1="1200" y1="0" x2="1200" y2="900" stroke="white" stroke-width="0.5"/>
+    <circle cx="720" cy="450" r="280" stroke="white" stroke-width="0.5" stroke-dasharray="8 12"/>
+    <circle cx="720" cy="450" r="400" stroke="white" stroke-width="0.5" stroke-dasharray="4 18"/>
+    <circle cx="240" cy="150" r="3" stroke="white" stroke-width="0.5"/>
+    <circle cx="480" cy="300" r="3" stroke="white" stroke-width="0.5"/>
+    <circle cx="960" cy="600" r="3" stroke="white" stroke-width="0.5"/>
+    <circle cx="1200" cy="750" r="3" stroke="white" stroke-width="0.5"/>
+    <path d="M 0 200 Q 100 100 200 0" stroke="white" stroke-width="0.5"/>
+    <path d="M 1440 700 Q 1340 800 1240 900" stroke="white" stroke-width="0.5"/>
+  </svg>
+
+  <!-- ─── Constellation — full-hero backdrop, z=2, text floats above at z=3 ─── -->
+  <svg class="c-anim" viewBox="0 0 1440 900" preserveAspectRatio="xMidYMid meet" fill="none"
+       xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+    <defs>
+      <radialGradient id="neb" cx="704" cy="219" r="352" gradientUnits="userSpaceOnUse">
+        <stop offset="0%"   stop-color="#16E9D8" stop-opacity="0.11"/>
+        <stop offset="38%"  stop-color="#16E9D8" stop-opacity="0.055"/>
+        <stop offset="72%"  stop-color="#a06020" stop-opacity="0.02"/>
+        <stop offset="100%" stop-color="#16E9D8" stop-opacity="0"/>
+      </radialGradient>
+      <radialGradient id="hAlc" cx="734" cy="269" r="104" gradientUnits="userSpaceOnUse">
+        <stop offset="0%"   stop-color="#ffffff" stop-opacity="0.08"/>
+        <stop offset="40%"  stop-color="#b0c8ff" stop-opacity="0.03"/>
+        <stop offset="100%" stop-color="#b0c8ff" stop-opacity="0"/>
+      </radialGradient>
+      <radialGradient id="hMai" cx="623" cy="145" r="80" gradientUnits="userSpaceOnUse">
+        <stop offset="0%"   stop-color="#ffffff" stop-opacity="0.065"/>
+        <stop offset="100%" stop-color="#b0c8ff" stop-opacity="0"/>
+      </radialGradient>
+      <radialGradient id="hEle" cx="442" cy="275" r="80" gradientUnits="userSpaceOnUse">
+        <stop offset="0%"   stop-color="#ffffff" stop-opacity="0.065"/>
+        <stop offset="100%" stop-color="#b0c8ff" stop-opacity="0"/>
+      </radialGradient>
+      <radialGradient id="hAtl" cx="998" cy="269" r="84" gradientUnits="userSpaceOnUse">
+        <stop offset="0%"   stop-color="#ffffff" stop-opacity="0.065"/>
+        <stop offset="100%" stop-color="#b0c8ff" stop-opacity="0"/>
+      </radialGradient>
+      <radialGradient id="hTay" cx="478" cy="150" r="68" gradientUnits="userSpaceOnUse">
+        <stop offset="0%"   stop-color="#ffffff" stop-opacity="0.055"/>
+        <stop offset="100%" stop-color="#b0c8ff" stop-opacity="0"/>
+      </radialGradient>
+    </defs>
+
+    <!-- Faint field stars scattered across hero -->
+    <circle cx="148"  cy="88"  r="1.2" fill="#ffffff" opacity="0.28"/>
+    <circle cx="284"  cy="52"  r="0.9" fill="#ffffff" opacity="0.22"/>
+    <circle cx="412"  cy="490" r="1.1" fill="#ffffff" opacity="0.20"/>
+    <circle cx="598"  cy="430" r="0.8" fill="#ffffff" opacity="0.18"/>
+    <circle cx="860"  cy="460" r="1.0" fill="#ffffff" opacity="0.20"/>
+    <circle cx="960"  cy="80"  r="1.2" fill="#ffffff" opacity="0.24"/>
+    <circle cx="1090" cy="140" r="0.9" fill="#ffffff" opacity="0.20"/>
+    <circle cx="1180" cy="380" r="1.1" fill="#ffffff" opacity="0.22"/>
+    <circle cx="1310" cy="110" r="1.3" fill="#ffffff" opacity="0.25"/>
+    <circle cx="1380" cy="300" r="0.8" fill="#ffffff" opacity="0.18"/>
+    <circle cx="72"   cy="340" r="1.0" fill="#ffffff" opacity="0.21"/>
+    <circle cx="188"  cy="620" r="0.9" fill="#ffffff" opacity="0.17"/>
+    <circle cx="820"  cy="38"  r="1.1" fill="#ffffff" opacity="0.23"/>
+    <circle cx="1250" cy="530" r="0.9" fill="#d0d8ff" opacity="0.19"/>
+    <circle cx="350"  cy="740" r="0.8" fill="#ffffff" opacity="0.15"/>
+
+    <!-- Nebulosity glow -->
+    <ellipse cx="704" cy="219" rx="352" ry="236" fill="url(#neb)"/>
+
+    <!-- Halo glows -->
+    <circle cx="734" cy="269" r="104" fill="url(#hAlc)"/>
+    <circle cx="734" cy="269" r="62"  fill="#b0c8ff" opacity="0.022"/>
+    <circle cx="734" cy="269" r="34"  fill="#ffffff" opacity="0.09"/>
+
+    <circle cx="623" cy="145" r="80"  fill="url(#hMai)"/>
+    <circle cx="623" cy="145" r="48"  fill="#c0d4ff" opacity="0.038"/>
+
+    <circle cx="442" cy="275" r="80"  fill="url(#hEle)"/>
+    <circle cx="442" cy="275" r="48"  fill="#c0d4ff" opacity="0.038"/>
+
+    <circle cx="998" cy="269" r="84"  fill="url(#hAtl)"/>
+    <circle cx="998" cy="269" r="50"  fill="#c0d4ff" opacity="0.038"/>
+
+    <circle cx="478" cy="150" r="68"  fill="url(#hTay)"/>
+    <circle cx="478" cy="150" r="41"  fill="#c0d4ff" opacity="0.032"/>
+
+    <circle cx="760" cy="342" r="60"  fill="#ffffff" opacity="0.006"/>
+    <circle cx="412" cy="217" r="56"  fill="#c0d4ff" opacity="0.010"/>
+
+    <!-- Connecting lines -->
+    <g stroke="#a8c0ff" stroke-width="0.7" opacity="0.28">
+      <line x1="442"  y1="275" x2="734"  y2="269"/>
+      <line x1="734"  y1="269" x2="998"  y2="269"/>
+      <line x1="734"  y1="269" x2="760"  y2="342"/>
+      <line x1="442"  y1="275" x2="478"  y2="150"/>
+      <line x1="478"  y1="150" x2="623"  y2="145"/>
+      <line x1="623"  y1="145" x2="575"  y2="96"/>
+      <line x1="442"  y1="275" x2="412"  y2="217"/>
+      <line x1="998"  y1="269" x2="1054" y2="244"/>
+    </g>
+
+    <!-- Star discs -->
+    <circle cx="734"  cy="269" r="21" fill="#ffffff" opacity="0.80"/>
+    <circle cx="623"  cy="145" r="16" fill="#dce8ff" opacity="0.73"/>
+    <circle cx="442"  cy="275" r="16" fill="#dce8ff" opacity="0.71"/>
+    <circle cx="998"  cy="269" r="17" fill="#dce8ff" opacity="0.73"/>
+    <circle cx="478"  cy="150" r="14" fill="#ccdcff" opacity="0.67"/>
+    <circle cx="760"  cy="342" r="12" fill="#c8d8ff" opacity="0.52"/>
+    <circle cx="412"  cy="217" r="11" fill="#c8d8ff" opacity="0.50"/>
+    <circle cx="575"  cy="96"  r="10" fill="#c0d0ff" opacity="0.48"/>
+    <circle cx="601"  cy="87"  r="6"  fill="#c0d0ff" opacity="0.35"/>
+    <circle cx="1054" cy="244" r="10" fill="#c0d0ff" opacity="0.42"/>
+
+    <!-- Labels -->
+    <g font-family="Barlow, sans-serif" fill="#e8eeff" opacity="0.62">
+      <text x="746"  y="308"  font-size="23" font-weight="400" letter-spacing="1.5">Alcyone</text>
+      <text x="632"  y="132"  font-size="21" font-weight="400" letter-spacing="1.5">Maia</text>
+      <text x="282"  y="280"  font-size="21" font-weight="400" letter-spacing="1.5">Electra</text>
+      <text x="1026" y="284"  font-size="21" font-weight="400" letter-spacing="1.5">Atlas</text>
+      <text x="326"  y="146"  font-size="20" font-weight="400" letter-spacing="1.5">Taygeta</text>
+      <text x="728"  y="372"  font-size="20" font-weight="400" letter-spacing="1.5" opacity="0.45">Merope</text>
+      <text x="252"  y="221"  font-size="19" font-weight="400" letter-spacing="1.5">Celaeno</text>
+      <text x="587"  y="85"   font-size="19" font-weight="400" letter-spacing="1.5">Asterope</text>
+      <text x="1058" y="236"  font-size="17" font-weight="400" letter-spacing="1.2" opacity="0.52">Pleione</text>
+    </g>
+  </svg>
+
+  <div class="hero-inner">
+    <h1 class="hero-title">Pleiades</h1>
+    <div class="hero-tag">IO Research · Cryptography</div>
+    <p class="hero-sub">Decentralised key recovery via threshold secret sharing</p>
+
+    <div class="badge-row">
+      <span class="badge b-rust">🦀 Rust</span>
+      <span class="badge b-mit">MIT License</span>
+    </div>
+
+    <div class="cta-row">
+      <a class="btn btn-primary" href="sss.html">Explore SSS</a>
+      <a class="btn btn-outline"  href="buss.html">Learn BUSS</a>
+    </div>
+  </div>
+</section>
+
+<!-- ── CONTENT ── -->
+<div class="container">
+
+  <!-- MYTHOLOGY -->
+  <div class="block">
+    <div class="myth-grid">
+      <div class="myth-text">
+        <h2>The Seven Sisters</h2>
+        <p class="body">
+          In Greek mythology, the <strong>Pleiades</strong> were the seven daughters of the titan
+          Atlas and the sea-nymph Pleione — Alcyone, Maia, Electra, Taygeta, Merope,
+          Celaeno, and Asterope. Condemned to hold up the sky, Atlas could no longer protect them.
+          Zeus transformed the sisters into stars, scattering them across the heavens.
+        </p>
+        <p class="body">
+          No single star tells the full story. One sister, Merope, hides in shame — the
+          "lost Pleiad" — just as a single share of a secret reveals <em>nothing</em> alone.
+          Only when enough sisters reunite does the constellation take shape.
+        </p>
+        <p class="body">
+          Input Output Group's Pleiades mirrors this myth: a secret is
+          <strong>split into shares</strong> distributed among guardians. Only when enough
+          shares converge can the constellation be redrawn and the secret recovered.
+        </p>
+      </div>
+      <div class="myth-visual">
+        <svg width="200" height="200" viewBox="0 0 200 200" fill="none">
+          <circle cx="100" cy="100" r="85" stroke="rgba(229,35,33,.12)" stroke-width="1" stroke-dasharray="4 5"/>
+          <circle cx="100" cy="100" r="56" stroke="rgba(229,35,33,.07)" stroke-width="1" stroke-dasharray="3 7"/>
+          <line x1="100" y1="100" x2="100" y2="18"  stroke="rgba(229,35,33,.25)" stroke-width=".8"/>
+          <line x1="100" y1="100" x2="153" y2="50"  stroke="rgba(229,35,33,.25)" stroke-width=".8"/>
+          <line x1="100" y1="100" x2="172" y2="120" stroke="rgba(229,35,33,.25)" stroke-width=".8"/>
+          <line x1="100" y1="100" x2="130" y2="172" stroke="rgba(229,35,33,.25)" stroke-width=".8"/>
+          <line x1="100" y1="100" x2="56"  y2="168" stroke="rgba(229,35,33,.25)" stroke-width=".8"/>
+          <line x1="100" y1="100" x2="28"  y2="118" stroke="rgba(229,35,33,.10)" stroke-width=".8" stroke-dasharray="3 4"/>
+          <circle cx="100" cy="18"  r="4.5" fill="white" opacity=".9"/>
+          <circle cx="153" cy="50"  r="4"   fill="white" opacity=".85"/>
+          <circle cx="172" cy="120" r="4"   fill="white" opacity=".8"/>
+          <circle cx="130" cy="172" r="4"   fill="white" opacity=".8"/>
+          <circle cx="56"  cy="168" r="4"   fill="white" opacity=".75"/>
+          <circle cx="28"  cy="118" r="3"   fill="white" opacity=".22"/>
+          <circle cx="100" cy="100" r="6" fill="rgba(229,35,33,.18)"/>
+          <circle cx="100" cy="100" r="3" fill="#E52321" opacity=".9"/>
+          <text x="84"  y="12"  font-size="7.5" fill="rgba(255,255,255,.55)" font-family="Georgia,serif">σ₁</text>
+          <text x="157" y="49"  font-size="7.5" fill="rgba(255,255,255,.5)"  font-family="Georgia,serif">σ₂</text>
+          <text x="175" y="122" font-size="7.5" fill="rgba(255,255,255,.5)"  font-family="Georgia,serif">σ₃</text>
+          <text x="126" y="189" font-size="7.5" fill="rgba(255,255,255,.5)"  font-family="Georgia,serif">σ₄</text>
+          <text x="38"  y="184" font-size="7.5" fill="rgba(255,255,255,.5)"  font-family="Georgia,serif">σ₅</text>
+          <text x="10"  y="119" font-size="7.5" fill="rgba(255,255,255,.18)" font-family="Georgia,serif">σ₆</text>
+          <text x="87"  y="117" font-size="7.5" fill="rgba(229,35,33,.85)"   font-family="Georgia,serif">s</text>
+        </svg>
+      </div>
+    </div>
+  </div>
+
+  <!-- FEATURES -->
+  <div class="block">
+    <h2 class="bt">What Pleiades Gives You</h2>
+    <p class="lead">Three complementary schemes, one library. Choose the level of trust you need.</p>
+    <div class="feats">
+      <div class="feat">
+        <div class="feat-icon">🔒</div>
+        <h3>Threshold Security</h3>
+        <p>Any t+1 shares reconstruct the secret. Fewer than t+1 reveal <em>nothing</em> — information-theoretic security.</p>
+      </div>
+      <div class="feat">
+        <div class="feat-icon">✅</div>
+        <h3>Verifiable Shares</h3>
+        <p>Feldman VSS publishes elliptic curve group commitments so every participant can verify their share without trusting the dealer.</p>
+      </div>
+      <div class="feat">
+        <div class="feat-icon">🗝️</div>
+        <h3>Stateless Recovery</h3>
+        <p>BUSS guardians derive their share on-demand from their own secret key — no extra storage, no pre-coordination.</p>
+      </div>
+      <div class="feat">
+        <div class="feat-icon">⚡</div>
+        <h3>FFT-Optimised</h3>
+        <p>Polynomial evaluation via FFT over elliptic curve multiplicative subgroup — O(n log n) for large share counts.</p>
+      </div>
+      <div class="feat">
+        <div class="feat-icon">🧩</div>
+        <h3>Generic over Curves</h3>
+        <p>Core schemes are generic over any <code>PrimeField</code> and <code>Group</code> — not locked to one curve.</p>
+      </div>
+      <div class="feat">
+        <div class="feat-icon">🦀</div>
+        <h3>Pure Rust</h3>
+        <p>Idiomatic <code>Result</code>-based error handling and a clean API designed for embedding in larger protocols.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- QUICK START -->
+  <div class="block">
+    <h2 class="bt">Quick Start</h2>
+    <p class="lead">Add Pleiades to your project and split a secret in a few lines.</p>
+
+    <div class="cw">
+      <div class="cbar">
+        <div class="dots"><span class="dot dr"></span><span class="dot dy"></span><span class="dot dg"></span></div>
+        <span class="clabel">Cargo.toml</span>
+      </div>
+      <pre><code class="language-toml">[dependencies]
+arc-pleiades = "0.1"</code></pre>
+    </div>
+
+    <div class="cw">
+      <div class="cbar">
+        <div class="dots"><span class="dot dr"></span><span class="dot dy"></span><span class="dot dg"></span></div>
+        <span class="clabel">src/main.rs</span>
+      </div>
+      <pre><code class="language-rust">use arc_pleiades::ShamirSecretSharing;
+use midnight_curves::Fr as Scalar;
+use rand::thread_rng;
+
+fn main() -> Result&lt;(), arc_pleiades::Error&gt; {
+    // 3-of-5: split into 4 shares, reconstruct from any 3
+    let sss = ShamirSecretSharing::new(2, 5)?;
+    let secret = Scalar::from(0xdeadbeef_u64);
+
+    let shares = sss.split(secret, &mut thread_rng())?;
+    println!("Distributed {} shares", shares.len()); // 4
+
+    let recovered = sss.reconstruct(&shares[..3])?;
+    assert_eq!(secret, recovered);
+    println!("Secret recovered ✓");
+    Ok(())
+}</code></pre>
+    </div>
+  </div>
+
+</div><!-- /container -->
+
+<footer>
+  <div class="fi">
+    <a class="fi-logo" href="https://iohk.io" target="_blank">
+      <img class="logo-dark"  src="assets/io-full-logo-white.png" alt="Input Output Group">
+      <img class="logo-light" src="assets/io-full-logo-black.png" alt="Input Output Group">
+    </a>
+    <div class="fi-links">
+      <a href="https://github.com/input-output-hk/arc-pleiades" target="_blank">GitHub</a>
+      <span style="color:var(--dim);font-size:.68rem;letter-spacing:.1em;text-transform:uppercase;">MIT License</span>
+      <span style="color:var(--dim);font-size:.68rem;letter-spacing:.1em;text-transform:uppercase;">Built with Rust</span>
+    </div>
+  </div>
+</footer>
+
+<script>
+  // Animated star field
+  (function () {
+    const canvas = document.getElementById('starfield');
+    const ctx    = canvas.getContext('2d');
+    let stars = [], W, H, frame = 0;
+    function resize() { W = canvas.width = canvas.offsetWidth; H = canvas.height = canvas.offsetHeight; }
+    function init() {
+      stars = [];
+      const n = Math.floor(W * H / 9000);
+      for (let i = 0; i < n; i++) {
+        stars.push({ x: Math.random()*W, y: Math.random()*H,
+          r: Math.random()*0.9+0.15, op: Math.random()*0.4+0.08,
+          speed: Math.random()*0.012+0.003, ph: Math.random()*Math.PI*2 });
+      }
+    }
+    function draw() {
+      ctx.clearRect(0, 0, W, H); frame += 0.01;
+      for (const s of stars) {
+        const op = s.op * (0.4 + 0.6 * Math.sin(frame * s.speed * 10 + s.ph));
+        ctx.beginPath(); ctx.arc(s.x, s.y, s.r, 0, Math.PI*2);
+        ctx.fillStyle = `rgba(220,235,255,${op})`; ctx.fill();
+      }
+      requestAnimationFrame(draw);
+    }
+    resize(); init(); draw();
+    window.addEventListener('resize', () => { resize(); init(); });
+  })();
+</script>
+<script src="app.js"></script>
+</body>
+</html>

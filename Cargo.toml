@@ -1,0 +1,50 @@
+[package]
+name = "arc-pleiades"
+version = "0.1.0"
+edition = "2021"
+rust-version = "1.87"
+description = "Decentralized key recovery via Shamir Secret Sharing and BUSS over BLS12-381"
+license = "MIT"
+
+[dependencies]
+midnight-curves = "0.3"
+ff = "0.13"
+group = "0.13"
+rand_core = "0.6"
+thiserror = "2"
+digest = "0.10"
+
+[dev-dependencies]
+rand = "0.8"
+criterion = { version = "0.5", features = ["html_reports"] }
+sha2 = "0.10"
+
+[[example]]
+name = "shamir"
+
+[[example]]
+name = "buss"
+
+[[bench]]
+name = "poly"
+harness = false
+
+[[bench]]
+name = "shamir"
+harness = false
+
+[[bench]]
+name = "feldman"
+harness = false
+
+[[bench]]
+name = "traceable_shamir"
+harness = false
+
+[[bench]]
+name = "buss"
+harness = false
+
+[[bench]]
+name = "traceable_buss"
+harness = false

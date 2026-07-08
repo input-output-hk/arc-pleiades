@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Traceable Shamir | Pleiades</title>
+  <meta name="description" content="Traceable Shamir Secret Sharing — Guruswami-Sudan tracing of corrupt guardians from the Pleiades library.">
+
+  <script>
+    (function(){var t=localStorage.getItem('pleiades-theme')||'dark';document.documentElement.setAttribute('data-theme',t)})();
+  </script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Barlow:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300&family=Bricolage+Grotesque:opsz,wght@12..60,300;12..60,400;12..60,500;12..60,600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/tokyo-night-dark.min.css">
+  <link rel="stylesheet" href="../style.css">
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/rust.min.js"></script>
+</head>
+<body>
+
+<!-- ── NAV ── -->
+<nav>
+  <a class="nav-brand" href="../index.html">
+    <img class="logo-dark"  src="../assets/io-marque-white.png" alt="Input Output Group">
+    <img class="logo-light" src="../assets/io-marque-black.png" alt="Input Output Group">
+    <span class="nav-sep"></span>
+    <span class="nav-product">pleiades</span>
+  </a>
+  <div class="nav-tabs">
+    <a class="tab-btn"        href="../index.html">Home</a>
+    <a class="tab-btn active" href="../sss.html">SSS</a>
+    <a class="tab-btn"        href="../buss.html">BUSS</a>
+    <a class="tab-btn"        href="../compare.html">Compare</a>
+  </div>
+  <div class="nav-right">
+    <a href="https://github.com/input-output-hk/arc-pleiades" class="nav-gh" target="_blank">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0 0 24 12c0-6.63-5.37-12-12-12z"/></svg>
+      GitHub
+    </a>
+    <button class="theme-toggle" onclick="toggleTheme()" aria-label="Toggle theme">
+      <svg class="icon-sun" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/>
+        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
+        <line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/>
+        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+      </svg>
+      <svg class="icon-moon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+      </svg>
+    </button>
+  </div>
+</nav>
+
+<!-- ── SUBNAV ── -->
+<div class="subnav">
+  <a class="subnav-link" href="../sss.html">Overview</a>
+  <a class="subnav-link" href="shamir.html">Shamir SSS</a>
+  <a class="subnav-link" href="feldman.html">Feldman VSS</a>
+  <a class="subnav-link active" href="traceable.html">Traceable Shamir</a>
+  <a class="subnav-link" href="compare.html">Compare</a>
+  <a class="subnav-link" href="demo.html">Demo</a>
+</div>
+
+<!-- ── PAGE HERO ── -->
+<div class="page-hero">
+  <div class="page-tag">Traceable · ePrint 2024/405</div>
+  <h1>Traceable Shamir Secret Sharing</h1>
+  <p>
+    Random evaluation points transform Shamir SSS into a traceable scheme: if up to
+    f &lt; t guardians leak their shares, the dealer can identify exactly who —
+    using only black-box oracle access to the adversary's reconstruction box.
+  </p>
+</div>
+
+<div class="container">
+
+  <!-- ── PAPER ── -->
+  <div class="block">
+    <a class="paper-card" href="https://eprint.iacr.org/2024/405" target="_blank">
+      <span class="paper-card-icon">📄</span>
+      <div>
+        <div class="label">ePrint 2024/405</div>
+        <div class="title">Traceable Secret Sharing: Strong Security and Efficient Constructions</div>
+        <div class="authors">Dan Boneh · Aditi Partap · Lior Rotem</div>
+        <p>
+          Introduces Traceable Secret Sharing, a primitive that lets the dealer run a Trace
+          algorithm — given black-box access to a corrupt reconstruction oracle — to identify
+          which parties leaked their shares. The construction in §3 uses random evaluation
+          points and Guruswami-Sudan list decoding; Pleiades implements this scheme.
+        </p>
+      </div>
+    </a>
+  </div>
+
+  <!-- ── OVERVIEW ── -->
+  <div class="block">
+    <h2 class="bt">Overview</h2>
+    <p class="overview-lead">
+      Boneh, Partap, and Rotem (ePrint 2024/405) showed that a single structural change —
+      using uniformly random evaluation points instead of fixed integers — turns Shamir SSS
+      into a traceable scheme. The dealer's trace key
+      <code class="il">tk = (H(x₁), …, H(xₙ))</code> stores a one-way hash of each evaluation
+      point rather than the raw value. If up to f &lt; t guardians leak their shares, calling
+      <code class="il">trace()</code> with those leaked shares internally issues N synthetic
+      reconstruction queries, collects evaluations of the "traitor polynomial"
+      h*(X) = Π<sub>j∈corrupt</sub>(xⱼ − X)/xⱼ, and recovers it via Guruswami-Sudan list
+      decoding. The roots of h* are the leaked evaluation points — matched back to guardian
+      identities by re-hashing each root and comparing against the trace key.
+    </p>
+    <p class="body">
+      Reconstruction is unchanged from Shamir: Lagrange interpolation at x = 0 on any t
+      shares. The random evaluation points are perfectly valid Lagrange nodes; no additional
+      cost beyond the key generation phase.
+    </p>
+
+    <div class="callout c-amber">
+      <strong>Tracing works because:</strong> the adversary's reconstruction box implicitly
+      evaluates the traitor polynomial h*(X) at the tracer's probe points. Sampling N
+      evaluations and running Guruswami-Sudan recovers h*; its roots identify the leakers.
+    </div>
+  </div>
+
+  <!-- ── PROTOCOL ── -->
+  <div class="block">
+    <h2 class="bt">Protocol</h2>
+
+    <div class="steps">
+      <div class="step">
+        <div class="step-n">01</div>
+        <div>
+          <h3>Split</h3>
+          <p>Sample n distinct nonzero random evaluation points x₁,…,xₙ ←$ 𝔽* and a random
+          degree-(t−1) polynomial q with q(0) = s. Distribute
+          <code class="il">(xᵢ, q(xᵢ))</code> to party i.
+          <code class="il">compute_tracing_keys</code> derives
+          <code class="il">tk = (H(x₁),…,H(xₙ))</code> — trace key and verification key coincide.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-n">02</div>
+        <div>
+          <h3>Reconstruct</h3>
+          <p>Any t parties submit their shares. Lagrange interpolation at x = 0 recovers
+          s = q(0). The random evaluation points are valid Lagrange nodes — reconstruction
+          is identical to standard Shamir.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-n">03</div>
+        <div>
+          <h3>Trace</h3>
+          <p>Given the leaked shares directly, <code class="il">trace()</code> internally issues
+          N reconstruction queries against synthesized fresh shares plus the leaked ones,
+          collecting (x'ℓ, zℓ) pairs that evaluate the traitor polynomial h*. The
+          Guruswami-Sudan decoder finds all degree-≤f polynomials matching ≥ C pairs
+          (N and C are derived automatically from f and a security parameter fixed at
+          construction). The roots of the recovered h* are the leaked xᵢ — matched back to
+          party indices by re-hashing each root and comparing against the trace key.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-n">04</div>
+        <div>
+          <h3>Verify</h3>
+          <p><code class="il">trace()</code> returns <code class="il">(accused, witness)</code>
+          where <code class="il">witness[k] = x_{accused[k]}</code>. Anyone holding tk can call
+          <code class="il">verify_trace</code> to check in O(f) hashes that
+          <code class="il">H(witness[k]) == tk[accused[k]]</code>.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="cw">
+      <div class="cbar">
+        <div class="dots"><span class="dot dr"></span><span class="dot dy"></span><span class="dot dg"></span></div>
+        <span class="clabel">Traceable Shamir (t=3, f=1)</span>
+      </div>
+      <pre><code class="language-rust">use arc_pleiades::TraceableShamir;
+use arc_pleiades::secret_sharing::{SecretSharing, TraceableSS};
+use midnight_curves::Fq as Scalar;
+use sha2::Sha512;
+use rand::thread_rng;
+
+let mut rng = thread_rng();
+// 3-out-of-5: any 3 shares reconstruct; can trace up to f=1 leaker
+let ts = TraceableShamir::&lt;Sha512&gt;::new(3, 5, 1, 4)?;
+let secret = Scalar::random(&amp;mut rng);
+
+// Split — random evaluation points; tk/vk hold H(xᵢ), not the raw xᵢ
+let poly = ts.polynomial(secret, &amp;mut rng);
+let shares = ts.split(&amp;poly)?;
+let (tk, vk) = ts.compute_tracing_keys(&amp;poly)?;
+
+// Reconstruct from any 3 shares (Lagrange at x=0)
+let recovered = ts.reconstruct(&amp;shares[..3])?;
+assert_eq!(secret, recovered);
+
+// ── Tracing: party 2 (shares[2]) leaked their share ──
+let corrupted = [shares[2]];
+let (accused, witness) = ts.trace(&amp;tk, &amp;corrupted, &amp;mut rng)?
+    .expect("should find the corrupt party");
+
+assert_eq!(accused, vec![2]); // 0-based index of the leaker
+ts.verify_trace(&amp;accused, &amp;witness, &amp;vk)?;</code></pre>
+    </div>
+  </div>
+
+</div><!-- /container -->
+
+<footer>
+  <div class="fi">
+    <a class="fi-logo" href="https://iohk.io" target="_blank">
+      <img class="logo-dark"  src="../assets/io-full-logo-white.png" alt="Input Output Group">
+      <img class="logo-light" src="../assets/io-full-logo-black.png" alt="Input Output Group">
+    </a>
+    <div class="fi-links">
+      <a href="https://eprint.iacr.org/2024/405" target="_blank">ePrint 2024/405</a>
+      <a href="compare.html">Compare &amp; Demo →</a>
+      <a href="https://github.com/input-output-hk/arc-pleiades" target="_blank">GitHub</a>
+    </div>
+  </div>
+</footer>
+
+<script src="../app.js"></script>
+</body>
+</html>

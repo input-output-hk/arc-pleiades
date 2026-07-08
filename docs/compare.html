@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Scheme Comparison | Pleiades</title>
+  <meta name="description" content="Compare all five Pleiades schemes — storage, on-chain data, verifiability, traceability, non-imputability, deniability, and benchmarks.">
+
+  <script>
+    (function(){var t=localStorage.getItem('pleiades-theme')||'dark';document.documentElement.setAttribute('data-theme',t)})();
+  </script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Barlow:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300&family=Bricolage+Grotesque:opsz,wght@12..60,300;12..60,400;12..60,500;12..60,600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<!-- ── NAV ── -->
+<nav>
+  <a class="nav-brand" href="index.html">
+    <img class="logo-dark"  src="assets/io-marque-white.png" alt="Input Output Group">
+    <img class="logo-light" src="assets/io-marque-black.png" alt="Input Output Group">
+    <span class="nav-sep"></span>
+    <span class="nav-product">pleiades</span>
+  </a>
+  <div class="nav-tabs">
+    <a class="tab-btn"        href="index.html">Home</a>
+    <a class="tab-btn"        href="sss.html">SSS</a>
+    <a class="tab-btn"        href="buss.html">BUSS</a>
+    <a class="tab-btn active" href="compare.html">Compare</a>
+  </div>
+  <div class="nav-right">
+    <a href="https://github.com/input-output-hk/arc-pleiades" class="nav-gh" target="_blank">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0 0 24 12c0-6.63-5.37-12-12-12z"/></svg>
+      GitHub
+    </a>
+    <button class="theme-toggle" onclick="toggleTheme()" aria-label="Toggle theme">
+      <svg class="icon-sun" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/>
+        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
+        <line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/>
+        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+      </svg>
+      <svg class="icon-moon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+      </svg>
+    </button>
+  </div>
+</nav>
+
+<!-- ── PAGE HERO ── -->
+<div class="page-hero">
+  <div class="page-tag">All Schemes · Comparison</div>
+  <h1>Scheme Comparison</h1>
+  <p>
+    All five schemes side-by-side — storage model, on-chain data, verifiability,
+    traceability, non-imputability, deniability, and measured performance.
+  </p>
+</div>
+
+<div class="container">
+
+  <div class="block">
+    <h2 class="bt">Structural &amp; security properties</h2>
+    <p class="body">
+      Shamir, Feldman, and Traceable Shamir are <strong>dealer-driven ("top-down")</strong>:
+      a dealer picks the secret polynomial and hands each guardian a specific share.
+      BUSS and Traceable BUSS are <strong>guardian-driven ("bottom-up")</strong>: each
+      guardian independently derives their own contribution from their own long-term key,
+      and the dealer only interpolates <em>through</em> the values guardians already
+      picked. That structural difference is what drives most of the rows below —
+      guardian storage, on-chain data, and deniability especially.
+    </p>
+
+    <div class="tw">
+      <table>
+        <thead>
+          <tr>
+            <th>Property</th>
+            <th>Shamir SSS</th>
+            <th>Feldman VSS</th>
+            <th>Traceable Shamir</th>
+            <th>BUSS</th>
+            <th>Traceable BUSS</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Threshold</td>
+            <td>(t+1)-of-(n−1)</td>
+            <td>(t+1)-of-(n−1)</td>
+            <td>t-of-n</td>
+            <td>(t+1)-of-(n−1)</td>
+            <td>(t+1)-of-(n−1)</td>
+          </tr>
+          <tr>
+            <td>Share generation</td>
+            <td>Top-down (dealer)</td>
+            <td>Top-down (dealer)</td>
+            <td>Top-down (dealer)</td>
+            <td class="yes">Bottom-up (guardian)</td>
+            <td class="yes">Bottom-up (guardian)</td>
+          </tr>
+          <tr>
+            <td>Guardian evaluation point</td>
+            <td>Fixed integer</td>
+            <td>Fixed integer</td>
+            <td>Random scalar</td>
+            <td>Fixed integer</td>
+            <td>Random scalar</td>
+          </tr>
+          <tr>
+            <td>Guardian storage</td>
+            <td class="no">Store shares</td>
+            <td class="no">Store shares</td>
+            <td class="no">Store shares</td>
+            <td class="yes">Stateless — σⱼ = H(owner_id ‖ skⱼ) rederivable on demand</td>
+            <td class="partial">σⱼ rederivable; xⱼ must be remembered (or re-derived by the deployment) per owner</td>
+          </tr>
+          <tr>
+            <td>Public / on-chain data</td>
+            <td class="yes">None</td>
+            <td class="partial">t+1 group commitments Cⱼ</td>
+            <td class="yes">None (trace key stays with the dealer)</td>
+            <td class="partial">φ: n−t−1 scalars</td>
+            <td class="partial">φ: n−t−1 shares, and vk if tracing is set up</td>
+          </tr>
+          <tr>
+            <td>Key rotation<br><span style="font-weight:400;opacity:0.65;font-size:0.85em">(update one guardian's key without a full re-share)</span></td>
+            <td class="no">No — requires a fresh split</td>
+            <td class="no">No — requires a fresh split</td>
+            <td class="no">No — requires a fresh split</td>
+            <td class="yes">Yes — <code class="il">update_public_shares</code> shifts φ by a guardian-supplied Δ</td>
+            <td class="yes">Yes — same Δ-shift, over (x, y) φ entries</td>
+          </tr>
+          <tr>
+            <td>Share verifiability</td>
+            <td class="no">None — trust the dealer</td>
+            <td class="yes">Yes — check gʸ = Σⱼ Cⱼ·xʲ</td>
+            <td class="no">None (combinable with Feldman)</td>
+            <td>—</td>
+            <td>—</td>
+          </tr>
+          <tr>
+            <td>Traceability against leakers</td>
+            <td class="no">No</td>
+            <td class="no">No</td>
+            <td class="yes">Yes — up to f &lt; t, black-box oracle</td>
+            <td class="no">No</td>
+            <td class="yes">Yes — up to f ≤ t, imperfect reconstruction box</td>
+          </tr>
+          <tr>
+            <td>Non-imputability<br></td>
+            <td>—</td>
+            <td>—</td>
+            <td class="yes">Yes</td>
+            <td>—</td>
+            <td class="yes">Yes</td>
+          </tr>
+          <tr>
+            <td>Guardian-set deniability — public<br><span style="font-weight:400;opacity:0.65;font-size:0.85em">(no public record of who a guardian is)</span></td>
+            <td class="no">No — guardian set is fixed by the dealer at setup</td>
+            <td class="no">No — same as Shamir, plus public commitments</td>
+            <td class="no">No — same as Shamir</td>
+            <td class="yes">Structural — φ is opaque; no guardian is named anywhere public</td>
+            <td class="partial">Weaker than BUSS — an actual trace event reveals a specific guardian's participation</td>
+          </tr>
+          <tr>
+            <td>Guardian-set deniability — interactive<br><span style="font-weight:400;opacity:0.65;font-size:0.85em">(a prober impersonating the owner can't tell if a node is really their guardian)</span></td>
+            <td class="no">No — a real guardian must hold a share stored under this owner's identifier; probing for it leaks membership</td>
+            <td class="no">No — same as Shamir</td>
+            <td class="no">No — same as Shamir</td>
+            <td class="yes">Yes — σⱼ = H(owner_id ‖ skⱼ) is a stateless, total function of any owner_id; every node computes an equally valid-looking response whether or not they're a real guardian</td>
+            <td class="partial">σⱼ still gives this; xⱼ breaks it — only real guardians hold stored state for this owner (unless a deployment derives xⱼ deterministically too, restoring the property)</td>
+          </tr>
+          <tr>
+            <td>Security model</td>
+            <td class="yes">Information-theoretic</td>
+            <td class="partial">Info-theoretic secrecy; verifiability needs discrete-log hardness</td>
+            <td class="partial">Info-theoretic secrecy; non-imputability needs hash preimage-resistance</td>
+            <td class="yes">Information-theoretic</td>
+            <td class="partial">Info-theoretic secrecy; non-imputability needs hash preimage-resistance</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="callout c-amber">
+      <strong>On "deniability" and "non-imputability":</strong> these describe three
+      different things. Non-imputability is about a <em>corrupt tracer</em> framing an
+      <em>honest guardian</em> after the fact. The two deniability rows are about whether
+      guardian-set membership can be learned at all, before anything goes wrong — but from
+      two different vantage points: <em>public</em> deniability asks whether an outside
+      observer can learn the guardian set from data that's published (φ, commitments, …);
+      <em>interactive</em> deniability asks whether an active attacker who impersonates the
+      owner and directly probes a node can tell it apart from a random one. BUSS gets the
+      interactive property "for free" because <code class="il">guardian_share</code> is a
+      stateless function that produces an equally plausible-looking output for <em>any</em>
+      owner_id, guardian or not — there's nothing guardian-specific to be caught holding.
+      Only Traceable BUSS's non-imputability claim comes with a concrete cryptographic
+      argument (forging a witness means inverting a hash); both deniability rows are
+      structural consequences of BUSS's bottom-up design, not claims this crate formally
+      proves — like everything else here, treat them as design properties to evaluate for
+      your threat model, not an audited guarantee.
+    </div>
+
+    <div class="callout c-blue">
+      <strong>Choosing a scheme:</strong> reach for <strong>Shamir</strong> for simple,
+      fast, dealer-driven sharing. Add <strong>Feldman</strong> when guardians need to
+      catch a cheating dealer before reconstruction. Use a <strong>Traceable</strong>
+      variant when you need to identify (and prove) which guardian leaked. Prefer the
+      <strong>BUSS</strong> family when guardians should stay stateless and their
+      identities shouldn't be tied to a public registry — social key recovery is the
+      target use case; add the <strong>Traceable</strong> variant on top when you also
+      need accountability without sacrificing non-imputability.
+    </div>
+  </div>
+
+  <!-- ── BENCHMARKS ── -->
+  <div class="block">
+    <h2 class="bt">Performance</h2>
+    <p class="body">
+      Every scheme has a dedicated Criterion benchmark file under
+      <a href="https://github.com/input-output-hk/arc-pleiades/tree/main/benches" target="_blank"><code class="il">benches/</code></a>
+      covering share creation, reconstruction, and (where applicable) tracing and trace
+      verification. Full methodology, every measured size, and how to reproduce these
+      numbers are in
+      <a href="https://github.com/input-output-hk/arc-pleiades/blob/main/BENCHMARK.md" target="_blank">BENCHMARK.md</a>.
+      The table below is a snapshot at a mid-sized community (n=50, t=25; trace/verify_trace
+      at t=10, n=20, f=1) to compare schemes at a glance. For Shamir, Feldman, and Traceable
+      Shamir, "Split" includes generating the random polynomial first — BUSS's
+      <code class="il">split()</code> has no separate polynomial-construction step to
+      exclude (it interpolates from guardian shares and evaluates in one call), so timing
+      only the evaluation half of the dealer-driven schemes would understate their cost
+      relative to BUSS's.
+    </p>
+
+    <div class="callout c-amber" style="font-size:0.85rem">
+      <strong>Test machine:</strong> Intel Core i9-14900HX (24 cores / 32 threads, up to
+      5.8 GHz), 62 GiB RAM, Ubuntu 24.04.4 LTS, <code class="il">rustc 1.93.1</code>, release
+      profile. Benchmarks are single-threaded, so only single-core performance is reflected
+      here. Numbers are Criterion's median estimate — re-run <code class="il">cargo bench</code>
+      for figures specific to your own machine.
+    </div>
+
+    <div class="tw">
+      <table>
+        <thead>
+          <tr>
+            <th>Scheme</th>
+            <th>Split</th>
+            <th>Reconstruct</th>
+            <th>Update public shares</th>
+            <th>Trace</th>
+            <th>Verify trace</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Shamir SSS</td>
+            <td>32.7 µs</td>
+            <td>54.3 µs</td>
+            <td>—</td>
+            <td>—</td>
+            <td>—</td>
+          </tr>
+          <tr>
+            <td>Feldman VSS</td>
+            <td>33.8 µs</td>
+            <td>54.0 µs</td>
+            <td>—</td>
+            <td>—</td>
+            <td>—</td>
+          </tr>
+          <tr>
+            <td>Traceable Shamir</td>
+            <td>45.7 µs</td>
+            <td>51.4 µs</td>
+            <td>—</td>
+            <td>2.07 ms</td>
+            <td>240 ns</td>
+          </tr>
+          <tr>
+            <td>BUSS</td>
+            <td>304 µs</td>
+            <td>158 µs</td>
+            <td>1.34 ms</td>
+            <td>—</td>
+            <td>—</td>
+          </tr>
+          <tr>
+            <td>Traceable BUSS</td>
+            <td>292 µs</td>
+            <td>151 µs</td>
+            <td>1.29 ms</td>
+            <td>2.94 ms</td>
+            <td>234 ns</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="callout c-blue">
+      <strong>Why BUSS's split is still slower than Shamir's at the same size:</strong>
+      Shamir interpolates a degree-t polynomial from t+1 points; BUSS's bottom-up structure
+      means the dealer interpolates a degree-(n−1) polynomial through <em>all</em> n points
+      (every guardian's self-chosen share participates, not just a threshold subset) — an
+      O(n²) Lagrange interpolation instead of O(n·t). Reconstruct doesn't pay this cost
+      (it only ever combines φ with a threshold subset), which is why BUSS's reconstruct
+      stays close to Shamir's. This gap used to be ~65× at n=50 (2.14 ms vs 32.7 µs) before
+      a bug fix in <code class="il">Polynomial::interpolate</code> — it was accidentally
+      O(k³) instead of O(k²), rebuilding each point's Lagrange basis from scratch instead of
+      dividing down a shared node polynomial — brought it to ~9×. See
+      <code class="il">benches/buss.rs</code> and <code class="il">benches/shamir.rs</code>
+      for the full size sweep.
+    </div>
+  </div>
+
+</div><!-- /container -->
+
+<footer>
+  <div class="fi">
+    <a class="fi-logo" href="https://iohk.io" target="_blank">
+      <img class="logo-dark"  src="assets/io-full-logo-white.png" alt="Input Output Group">
+      <img class="logo-light" src="assets/io-full-logo-black.png" alt="Input Output Group">
+    </a>
+    <div class="fi-links">
+      <a href="sss/compare.html">SSS family compare →</a>
+      <a href="buss/compare.html">BUSS family compare →</a>
+      <a href="https://github.com/input-output-hk/arc-pleiades/blob/main/BENCHMARK.md" target="_blank">Full benchmarks</a>
+      <a href="https://github.com/input-output-hk/arc-pleiades" target="_blank">GitHub</a>
+    </div>
+  </div>
+</footer>
+
+<script src="app.js"></script>
+</body>
+</html>

@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Traceable BUSS | Pleiades</title>
+  <meta name="description" content="Traceable BUSS — random evaluation points, OWF tracing, and non-imputability for community key recovery.">
+
+  <script>
+    (function(){var t=localStorage.getItem('pleiades-theme')||'dark';document.documentElement.setAttribute('data-theme',t)})();
+  </script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Barlow:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300&family=Bricolage+Grotesque:opsz,wght@12..60,300;12..60,400;12..60,500;12..60,600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/tokyo-night-dark.min.css">
+  <link rel="stylesheet" href="../style.css">
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/rust.min.js"></script>
+</head>
+<body>
+
+<!-- ── NAV ── -->
+<nav>
+  <a class="nav-brand" href="../index.html">
+    <img class="logo-dark"  src="../assets/io-marque-white.png" alt="Input Output Group">
+    <img class="logo-light" src="../assets/io-marque-black.png" alt="Input Output Group">
+    <span class="nav-sep"></span>
+    <span class="nav-product">pleiades</span>
+  </a>
+  <div class="nav-tabs">
+    <a class="tab-btn"        href="../index.html">Home</a>
+    <a class="tab-btn"        href="../sss.html">SSS</a>
+    <a class="tab-btn active" href="../buss.html">BUSS</a>
+    <a class="tab-btn"        href="../compare.html">Compare</a>
+  </div>
+  <div class="nav-right">
+    <a href="https://github.com/input-output-hk/arc-pleiades" class="nav-gh" target="_blank">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0 0 24 12c0-6.63-5.37-12-12-12z"/></svg>
+      GitHub
+    </a>
+    <button class="theme-toggle" onclick="toggleTheme()" aria-label="Toggle theme">
+      <svg class="icon-sun" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/>
+        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
+        <line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/>
+        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+      </svg>
+      <svg class="icon-moon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+      </svg>
+    </button>
+  </div>
+</nav>
+
+<!-- ── SUBNAV ── -->
+<div class="subnav">
+  <a class="subnav-link" href="../buss.html">Overview</a>
+  <a class="subnav-link" href="buss.html">BUSS</a>
+  <a class="subnav-link active" href="traceable.html">Traceable BUSS</a>
+  <a class="subnav-link" href="compare.html">Compare</a>
+  <a class="subnav-link" href="demo.html">Demo</a>
+</div>
+
+<!-- ── PAGE HERO ── -->
+<div class="page-hero">
+  <div class="page-tag">Traceable · ePrint 2025/2089</div>
+  <h1>Traceable BUSS</h1>
+  <p>
+    Extends BUSS with random evaluation points hidden behind a one-way function.
+    Corrupt guardians can be identified and their guilt proven; honest guardians
+    cannot be falsely accused — any valid accusation requires producing an OWF preimage.
+  </p>
+</div>
+
+<div class="container">
+
+  <!-- ── PAPER ── -->
+  <div class="block">
+    <a class="paper-card" href="https://eprint.iacr.org/2025/2089" target="_blank">
+      <span class="paper-card-icon">📄</span>
+      <div>
+        <div class="label">ePrint 2025/2089</div>
+        <div class="title">Traceable Bottom-Up Secret Sharing and Law &amp; Order on Community Social Key Recovery</div>
+        <div class="authors">Sayani Hajra · Soutrik Kar · Pratyay Mukherjee · Arghya Pal</div>
+        <p>
+          Extends BUSS with traceability and non-imputability. By replacing integer
+          evaluation points with random field elements and hiding them behind a one-way
+          function, Traceable BUSS ensures that any corrupt guardian can be identified, while an
+          honest guardian's evaluation point cannot be forged by a malicious tracer.
+        </p>
+      </div>
+    </a>
+  </div>
+
+  <!-- ── OVERVIEW ── -->
+  <div class="block">
+    <h2 class="bt">Overview</h2>
+    <p class="overview-lead">
+      Traceable BUSS extends BUSS with two structural changes. First, each guardian's
+      evaluation point xⱼ is a random field element rather than the integer index j.
+      Second, the trace key stores H(xⱼ) — a one-way hash image — rather than xⱼ
+      directly, so trace key and verification key coincide:
+      <code class="il">tk = vk = (H(x₁), …, H(xₙ₋₁))</code>. Together these give
+      <strong>non-imputability</strong>: to accuse guardian j, the tracer must produce xⱼ as
+      a witness, and the verifier checks H(witness) = vk[j]. Forging a false accusation
+      requires inverting the hash.
+    </p>
+    <p class="body">
+      The tracing mechanism mirrors Traceable Shamir, generalised to the bottom-up setting:
+      given the leaked shares of up to f ≤ t corrupt guardians, <code class="il">trace()</code>
+      reconstructs against synthesized fresh shares plus one perturbed probe point per query,
+      collecting noisy evaluations of a degree-f "traitor polynomial". <strong>Guruswami-Sudan list
+      decoding</strong> recovers that polynomial — and hence the corrupt xⱼ as its roots — even when
+      some queries disagree, so tracing works from an <em>imperfect</em> reconstruction box, not
+      only the all-t-corrupted "perfect box" case.
+    </p>
+
+    <div class="callout c-red">
+      <strong>Hash-to-field construction:</strong> <code class="il">hash_fr(label, x) = H(label ‖ x_bytes)</code>
+      reduced to a field element via <code class="il">FromUniformBytes&lt;64&gt;</code> (SHA-512 or
+      BLAKE2b-512). Domain separation (a distinct <code class="il">label</code> per scheme) prevents
+      cross-protocol attacks — the same helper is shared with Traceable Shamir.
+    </div>
+  </div>
+
+  <!-- ── PROTOCOL ── -->
+  <div class="block">
+    <h2 class="bt">Protocol</h2>
+
+    <div class="steps">
+      <div class="step">
+        <div class="step-n">01</div>
+        <div>
+          <h3>Guardian Share Derivation</h3>
+          <p>Same as BUSS: each guardian j computes <code class="il">σⱼ = H(owner_id ‖ skⱼ)</code>.
+          They additionally choose a <strong>random evaluation point</strong>
+          <code class="il">xⱼ ←$ 𝔽*</code>, distinct from every other guardian's.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-n">02</div>
+        <div>
+          <h3>Owner Builds φ and Trace Key</h3>
+          <p>The owner interpolates <code class="il">q</code> through
+          <code class="il">(0, s), (x₁, σ₁), …, (xₙ₋₁, σₙ₋₁)</code>, then evaluates it at
+          n−t−1 fresh points (derived by hashing q's coefficients, since split has no RNG
+          input) to produce <code class="il">φ</code>. <code class="il">compute_tracing_keys</code>
+          derives <code class="il">vk = (H(x₁), …, H(xₙ₋₁))</code> — published as the
+          verification key.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-n">03</div>
+        <div>
+          <h3>Reconstruct</h3>
+          <p>Any t+1 guardians combine their <code class="il">(xⱼ, σⱼ)</code> with φ — exactly
+          n points of the degree-(n−1) polynomial q — to recover s = q(0) via Lagrange
+          interpolation.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-n">04</div>
+        <div>
+          <h3>Trace and Verify</h3>
+          <p>Given the f leaked guardian shares, <code class="il">trace()</code> issues N
+          reconstruction queries — each combining the leaked shares, t−f fresh synthetic
+          shares, and one δ-shifted probe point — to collect noisy evaluations of the traitor
+          polynomial h*(X) = Π<sub>j corrupt</sub>(xⱼ − X)/xⱼ. Guruswami-Sudan list decoding
+          recovers h*; its roots are matched to guardians by re-hashing and comparing against
+          <code class="il">vk</code>. <code class="il">verify_trace</code> checks
+          <code class="il">H(witness[k]) == vk[accused[k]]</code> for each accusation.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="cw">
+      <div class="cbar">
+        <div class="dots"><span class="dot dr"></span><span class="dot dy"></span><span class="dot dg"></span></div>
+        <span class="clabel">Traceable BUSS — full protocol (t=3, n=6, f=1)</span>
+      </div>
+      <pre><code class="language-rust">use arc_pleiades::TraceableBuss;
+use arc_pleiades::bottom_up::buss::Share;
+use arc_pleiades::bottom_up::{BottumUpSS, TraceableBSS};
+use midnight_curves::Fq as Scalar;
+use sha2::Sha512;
+use rand::thread_rng;
+
+let mut rng = thread_rng();
+// t=3, n=6: threshold=4, 5 guardian shares, |φ|=2, traces up to f=1 leaker
+let tbuss = TraceableBuss::&lt;Sha512&gt;::new(3, 6, 1, 4)?;
+let secret = Scalar::random(&amp;mut rng);
+
+// Each guardian independently picks a random eval point and derives σ from their key
+let shares: Vec&lt;Share&lt;Scalar&gt;&gt; = (0..5)
+    .map(|_| Share { x: Scalar::random(&amp;mut rng), y: Scalar::random(&amp;mut rng) })
+    .collect();
+
+// Owner interpolates q through (0,s) and the guardian shares; publishes φ
+let phi = tbuss.split(secret, &amp;shares)?;
+let (tk, vk) = tbuss.compute_tracing_keys(&amp;shares)?;
+
+// Recovery: any 4 guardian shares + φ = n evaluations of q
+let recovered = tbuss.reconstruct(&amp;phi, &amp;shares[..4])?;
+assert_eq!(secret, recovered);
+
+// ── Tracing: guardian at index 2 leaked their share ──
+let corrupted = [Share { x: shares[2].x, y: shares[2].y }];
+let (accused, witness) = tbuss.trace(&amp;tk, &amp;phi, &amp;corrupted, &amp;mut rng)?
+    .expect("should find the corrupt guardian");
+
+assert_eq!(accused, vec![2]);
+tbuss.verify_trace(&amp;accused, &amp;witness, &amp;vk)?;</code></pre>
+    </div>
+  </div>
+
+</div><!-- /container -->
+
+<footer>
+  <div class="fi">
+    <a class="fi-logo" href="https://iohk.io" target="_blank">
+      <img class="logo-dark"  src="../assets/io-full-logo-white.png" alt="Input Output Group">
+      <img class="logo-light" src="../assets/io-full-logo-black.png" alt="Input Output Group">
+    </a>
+    <div class="fi-links">
+      <a href="https://eprint.iacr.org/2025/2089" target="_blank">ePrint 2025/2089</a>
+      <a href="compare.html">Compare →</a>
+      <a href="https://github.com/input-output-hk/arc-pleiades" target="_blank">GitHub</a>
+    </div>
+  </div>
+</footer>
+
+<script src="../app.js"></script>
+</body>
+</html>

@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BUSS — Bottom-Up Secret Sharing | Pleiades</title>
+  <meta name="description" content="Bottom-Up Secret Sharing (BUSS / ANARKey §5.1) — stateless guardian recovery from the Pleiades library.">
+
+  <script>
+    (function(){var t=localStorage.getItem('pleiades-theme')||'dark';document.documentElement.setAttribute('data-theme',t)})();
+  </script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Barlow:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300&family=Bricolage+Grotesque:opsz,wght@12..60,300;12..60,400;12..60,500;12..60,600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/tokyo-night-dark.min.css">
+  <link rel="stylesheet" href="../style.css">
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/rust.min.js"></script>
+</head>
+<body>
+
+<!-- ── NAV ── -->
+<nav>
+  <a class="nav-brand" href="../index.html">
+    <img class="logo-dark"  src="../assets/io-marque-white.png" alt="Input Output Group">
+    <img class="logo-light" src="../assets/io-marque-black.png" alt="Input Output Group">
+    <span class="nav-sep"></span>
+    <span class="nav-product">pleiades</span>
+  </a>
+  <div class="nav-tabs">
+    <a class="tab-btn"        href="../index.html">Home</a>
+    <a class="tab-btn"        href="../sss.html">SSS</a>
+    <a class="tab-btn active" href="../buss.html">BUSS</a>
+    <a class="tab-btn"        href="../compare.html">Compare</a>
+  </div>
+  <div class="nav-right">
+    <a href="https://github.com/input-output-hk/arc-pleiades" class="nav-gh" target="_blank">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0 0 24 12c0-6.63-5.37-12-12-12z"/></svg>
+      GitHub
+    </a>
+    <button class="theme-toggle" onclick="toggleTheme()" aria-label="Toggle theme">
+      <svg class="icon-sun" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/>
+        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
+        <line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/>
+        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+      </svg>
+      <svg class="icon-moon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+      </svg>
+    </button>
+  </div>
+</nav>
+
+<!-- ── SUBNAV ── -->
+<div class="subnav">
+  <a class="subnav-link" href="../buss.html">Overview</a>
+  <a class="subnav-link active" href="buss.html">BUSS</a>
+  <a class="subnav-link" href="traceable.html">Traceable BUSS</a>
+  <a class="subnav-link" href="compare.html">Compare</a>
+  <a class="subnav-link" href="demo.html">Demo</a>
+</div>
+
+<!-- ── PAGE HERO ── -->
+<div class="page-hero">
+  <div class="page-tag">Stateless · ANARKey ePrint 2025/551</div>
+  <h1>Bottom-Up Secret Sharing</h1>
+  <p>
+    Guardians choose their own shares from their existing keys — the owner collects them,
+    publishes a short auxiliary value φ, and guardians can recover the secret on demand
+    without ever having stored anything extra.
+  </p>
+</div>
+
+<div class="container">
+
+  <!-- ── PAPER ── -->
+  <div class="block">
+    <a class="paper-card" href="https://eprint.iacr.org/2025/551" target="_blank">
+      <span class="paper-card-icon">📄</span>
+      <div>
+        <div class="label">IO Research · ePrint 2025/551</div>
+        <div class="title">ANARKey: A New Approach to (Socially) Recover Keys</div>
+        <div class="authors">Aniket Kate · Pratyay Mukherjee · Hamza Saleem · Pratik Sarkar · Bhaskar Roberts</div>
+        <p>
+          The Bottom-Up Secret Sharing (BUSS) scheme used here is formalised in §5.1.
+          ANARKey introduces a community-based social key recovery model where each member
+          acts as guardian for others using only their existing secret key — no additional
+          storage required. The scheme is proven secure against malicious and adaptive
+          corruption of up to t parties.
+        </p>
+      </div>
+    </a>
+  </div>
+
+  <!-- ── OVERVIEW ── -->
+  <div class="block">
+    <h2 class="bt">Overview</h2>
+    <p class="overview-lead">
+      Bottom-Up Secret Sharing inverts the classical trust model of Shamir SSS.
+      In traditional schemes, the dealer chooses all shares and distributes them to
+      guardians — who must store them securely forever. In BUSS, each guardian
+      independently derives their own share from their existing secret key:
+      <code class="il">σⱼ = H(owner_id ‖ skⱼ)</code>. The owner collects these
+      guardian-chosen shares, builds the unique polynomial of degree n through (0, secret) and all
+      guardian points, then publishes a short auxiliary value φ to a public bulletin board.
+      When recovery is needed, any t+1 guardians recompute their share on demand — the
+      same hash call, no stored state.
+    </p>
+    <p class="body">
+      The key insight: a single guardian key serves as guardian for many key-owners.
+      Each distinct <code class="il">owner_id</code> yields an independent, uncorrelated
+      share — so a guardian protecting their own hardware wallet key automatically becomes
+      a potential guardian for any friend who registers them.
+    </p>
+
+    <div class="callout c-red">
+      <strong>Inverted trust model:</strong> in traditional SSS the <em>dealer</em> chooses
+      and distributes all shares to guardians. In BUSS, <em>guardians</em> choose their own
+      shares proactively — the dealer only learns them in order to build φ. This inverts the
+      trust model and lets guardians recover on-demand from their own key, with no extra storage.
+    </div>
+  </div>
+
+  <!-- ── PROTOCOL ── -->
+  <div class="block">
+    <h2 class="bt">Protocol</h2>
+    <p class="body">
+      BUSS operates in two phases. During <strong>backup</strong>, each guardian derives their
+      share from their own secret key and the owner's identifier. The owner collects all guardian
+      shares, builds a unique degree-(n−1) polynomial through (0, secret) and the n−1 guardian
+      points, then publishes a short auxiliary value φ to a public bulletin board.
+    </p>
+
+    <div class="steps">
+      <div class="step">
+        <div class="step-n">01</div>
+        <div>
+          <h3>Guardian Share Derivation</h3>
+          <p>Guardian j computes <code class="il">σⱼ = H(owner_id ‖ skⱼ)</code>
+          deterministically from their own secret key and the owner's public identifier.
+          No extra storage, no round-trip coordination — the same call always yields the same σⱼ.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-n">02</div>
+        <div>
+          <h3>Owner Interpolates and Publishes φ</h3>
+          <p>The owner builds the unique degree-(n−1) polynomial f through
+          <code class="il">(0, s), (1, σ₁), …, (n−1, σ_{n−1})</code>, then evaluates at
+          the negative integers to produce
+          <code class="il">φ = (f(−1), …, f(−(n−t−1)))</code> — just n−t−1 field elements
+          posted publicly (e.g., on-chain).</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-n">03</div>
+        <div>
+          <h3>Recovery</h3>
+          <p>Any t+1 guardians recompute their σ on-demand (same hash call as step 01).
+          Combined with the n−t−1 public φ points, they have exactly n evaluations of f —
+          enough to recover s = f(0) via Lagrange interpolation.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="callout c-blue">
+      <strong>Why φ has exactly n−t−1 entries:</strong> the t+1 guardian shares plus n−t−1
+      public points sum to n — the degree of f plus one, the minimum needed to uniquely
+      determine f and hence s = f(0).
+    </div>
+
+    <div class="diagram-pre">  Protocol overview (n = 4, t = 1 · threshold = 2 · |φ| = 2)
+
+  Guardians                   Owner P₁                   Bulletin Board
+  ─────────────────────       ────────────────────        ────────────────
+  P₂: σ₁,₂ = H(pk₁, sk₂) ─▶ │
+  P₃: σ₁,₃ = H(pk₁, sk₃) ─▶ │  build f of degree 3
+  P₄: σ₁,₄ = H(pk₁, sk₄) ─▶ │  f(0)=sk₁, f(j)=σ₁,ⱼ    φ₁ = (f(−1), f(−2))  ──▶  ✓
+
+  Recovery (any 2 of 3 guardians)         Uses:
+  ────────────────────────────────         t+1 = 2 recomputed guardian shares
+  P₂ recomputes σ₁,₂                      + n−t−1 = 2 public φ points
+  P₃ recomputes σ₁,₃                      = 4 points on f  →  Lagrange  →  sk₁ ✓</div>
+  </div>
+
+  <!-- ── CODE ── -->
+  <div class="block">
+    <h2 class="bt">Stateless Guardian Shares</h2>
+    <p class="body">
+      The <code class="il">guardian_share</code> function is the primitive that enables
+      stateless recovery. It hashes <code class="il">owner_id ‖ guardian_sk</code> using a
+      64-byte hash function and reduces the output to a field element via
+      <code class="il">FromUniformBytes&lt;64&gt;</code> — bias &lt; 2⁻¹²⁸ for 256-bit fields.
+    </p>
+
+    <div class="cw">
+      <div class="cbar">
+        <div class="dots"><span class="dot dr"></span><span class="dot dy"></span><span class="dot dg"></span></div>
+        <span class="clabel">BUSS — full protocol (t=2, n=5)</span>
+      </div>
+      <pre><code class="language-rust">use arc_pleiades::{BottomUpSSS, guardian_share};
+use arc_pleiades::bottom_up::BottumUpSS;
+use arc_pleiades::bottom_up::buss::Share;
+use midnight_curves::Fq as Scalar;
+use sha2::Sha512;
+use rand::thread_rng;
+
+let owner_id = b"alice@example.com";
+let secret   = Scalar::random(&amp;mut thread_rng());
+
+// ── Backup: each guardian independently derives σ from their own key ──
+let g_keys: Vec&lt;Scalar&gt; = (0..4).map(|_| Scalar::random(&amp;mut thread_rng())).collect();
+let sigma_b: Vec&lt;Share&lt;Scalar&gt;&gt; = g_keys.iter().enumerate()
+    .map(|(i, &amp;sk)| Share {
+        x: Scalar::from((i + 1) as u64),
+        y: guardian_share::&lt;Scalar, Sha512&gt;(owner_id, sk),
+    })
+    .collect();
+
+// ── Owner collects all σ, builds f, publishes φ (2 field elements) ──
+let buss = BottomUpSSS::new(2, 5)?; // t=2, n=5 → 4 shares, threshold 3
+let phi = buss.split(secret, &amp;sigma_b)?;
+// Publish phi to a bulletin board (n−t−1 = 2 field elements)
+
+// ── Recovery: any 3 guardians recompute σ on-demand — no stored state ──
+let sigma_r = vec![
+    Share { x: Scalar::from(1u64), y: guardian_share::&lt;Scalar, Sha512&gt;(owner_id, g_keys[0]) },
+    Share { x: Scalar::from(3u64), y: guardian_share::&lt;Scalar, Sha512&gt;(owner_id, g_keys[2]) },
+    Share { x: Scalar::from(4u64), y: guardian_share::&lt;Scalar, Sha512&gt;(owner_id, g_keys[3]) },
+];
+let recovered = buss.reconstruct(&amp;phi, &amp;sigma_r)?;
+assert_eq!(secret, recovered);</code></pre>
+    </div>
+
+    <div class="callout c-green">
+      <strong>Ideal use case:</strong> BUSS shines when guardians are existing key-holders —
+      hardware wallet owners, multi-sig participants, community members — who cannot be asked
+      to manage additional data. A guardian recovering a friend's key uses the same secret key
+      they already protect. Nothing new to store, nothing new to lose.
+    </div>
+  </div>
+
+</div><!-- /container -->
+
+<footer>
+  <div class="fi">
+    <a class="fi-logo" href="https://iohk.io" target="_blank">
+      <img class="logo-dark"  src="../assets/io-full-logo-white.png" alt="Input Output Group">
+      <img class="logo-light" src="../assets/io-full-logo-black.png" alt="Input Output Group">
+    </a>
+    <div class="fi-links">
+      <a href="https://eprint.iacr.org/2025/551" target="_blank">ANARKey (ePrint 2025/551)</a>
+      <a href="compare.html">Compare →</a>
+      <a href="https://github.com/input-output-hk/arc-pleiades" target="_blank">GitHub</a>
+    </div>
+  </div>
+</footer>
+
+<script src="../app.js"></script>
+</body>
+</html>
