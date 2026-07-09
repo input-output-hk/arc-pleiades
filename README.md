@@ -173,7 +173,7 @@ Enforced by the `msrv` CI job.
 
 ## License
 
-MIT — see [`LICENSE`](LICENSE).
+APACHE 2.0 — see [`LICENSE`](LICENSE).
 
 ---
 
