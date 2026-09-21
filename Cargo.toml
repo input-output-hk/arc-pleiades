@@ -4,7 +4,7 @@ version = "0.1.0"
 edition = "2021"
 rust-version = "1.87"
 description = "Decentralized key recovery via Shamir Secret Sharing and BUSS over BLS12-381"
-license = "MIT"
+license = "Apache-2.0"
 
 [dependencies]
 midnight-curves = "0.3"
